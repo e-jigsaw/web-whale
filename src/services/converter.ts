@@ -1,41 +1,52 @@
-import TurndownService from 'turndown';
-import fetch from 'node-fetch';
 import { Storage } from '@google-cloud/storage';
+import { spawn } from 'child_process';
+import { join } from 'path';
 
 export class UrlConverterService {
-  private turndown: TurndownService;
   private storage: Storage;
   private bucketName: string;
 
   constructor(bucketName: string) {
-    this.turndown = new TurndownService({
-      headingStyle: 'atx',
-      codeBlockStyle: 'fenced',
-      bulletListMarker: '-',
-      emDelimiter: '_'
-    });
-
-    // Customize Turndown rules
-    this.turndown.addRule('removeEmptyParagraphs', {
-      filter: (node) => {
-        return node.nodeName === 'P' && node.textContent.trim() === '';
-      },
-      replacement: () => ''
-    });
-
     this.storage = new Storage();
     this.bucketName = bucketName;
   }
 
   async convertToMarkdown(url: string): Promise<string> {
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch URL: ${response.statusText}`);
-      }
+      const scriptPath = join(__dirname, '..', 'python', 'url_to_markdown.py');
+      
+      return new Promise((resolve, reject) => {
+        const pythonProcess = spawn('python3', [scriptPath, url]);
+        let output = '';
+        let errorOutput = '';
 
-      const html = await response.text();
-      return this.turndown.turndown(html);
+        pythonProcess.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+          errorOutput += data.toString();
+        });
+
+        pythonProcess.on('close', (code) => {
+          if (code !== 0) {
+            reject(new Error(`Python script failed: ${errorOutput}`));
+            return;
+          }
+
+          try {
+            const result = JSON.parse(output);
+            if (result.error) {
+              reject(new Error(result.error));
+              return;
+            }
+            resolve(output);
+          } catch (e) {
+            // If output is not JSON, it's the markdown content
+            resolve(output);
+          }
+        });
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Error converting URL to markdown: ${error.message}`);
