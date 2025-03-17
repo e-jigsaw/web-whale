@@ -1,0 +1,28 @@
+{
+  "name": "web-whale",
+  "version": "0.1.0",
+  "description": "A bot that converts Discord message URLs to markdown and uploads to GCS",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/turndown": "^5.0.4",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "eslint": "^8.57.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
+  }
+}
