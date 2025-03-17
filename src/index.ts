@@ -19,6 +19,7 @@ client.once(Events.ClientReady, (readyClient) => {
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
+  if (!config.allowedChannelIds.includes(message.channelId)) return;
 
   const urls = message.content.match(/https?:\/\/[^\s]+/g);
   if (!urls) return;
