@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { Storage } from '@google-cloud/storage';
 import { config } from '../config';
 import { ConversionResult } from '../types';
+import { urlToFilename } from '../utils/filename';
 
 export class Converter {
   private turndown: TurndownService;
@@ -19,8 +20,8 @@ export class Converter {
     return this.turndown.turndown(html);
   }
 
-  async uploadToGCS(markdown: string): Promise<ConversionResult> {
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.md`;
+  async uploadToGCS(markdown: string, url: string): Promise<ConversionResult> {
+    const filename = urlToFilename(url);
     const bucket = this.storage.bucket(config.gcsBucketName);
     const file = bucket.file(filename);
 
@@ -36,6 +37,6 @@ export class Converter {
 
   async processUrl(url: string): Promise<ConversionResult> {
     const markdown = await this.convertUrlToMarkdown(url);
-    return this.uploadToGCS(markdown);
+    return this.uploadToGCS(markdown, url);
   }
 }
