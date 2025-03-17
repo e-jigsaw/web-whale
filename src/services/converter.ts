@@ -1,7 +1,7 @@
 import TurndownService from 'turndown';
 import fetch from 'node-fetch';
 import { Storage } from '@google-cloud/storage';
-import { config } from '../config';
+import { config } from '../config/index';
 import { ConversionResult } from '../types';
 import { urlToFilename } from '../utils/filename';
 

@@ -1,12 +1,10 @@
 import { Storage } from '@google-cloud/storage';
+import { config } from '../config/index';
 
 const storage = new Storage();
 
 export async function uploadToGCS(filename: string, content: string): Promise<string> {
-  const bucketName = process.env.GCS_BUCKET_NAME;
-  if (!bucketName) {
-    throw new Error('GCS_BUCKET_NAME is required');
-  }
+  const bucketName = config.gcsBucketName;
 
   try {
     const bucket = storage.bucket(bucketName);

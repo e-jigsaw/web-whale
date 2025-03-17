@@ -1,10 +1,8 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { config } from 'dotenv';
 import { convertUrlToMarkdown } from './utils/converter';
 import { uploadToGCS } from './utils/storage';
 import { urlToFilename } from './utils/filename';
-
-config();
+import { config } from './config/index';
 
 const client = new Client({
   intents: [
@@ -40,9 +38,5 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 export const startBot = () => {
-  const token = process.env.DISCORD_TOKEN;
-  if (!token) {
-    throw new Error('DISCORD_TOKEN is required');
-  }
-  client.login(token);
+  client.login(config.discordToken);
 };

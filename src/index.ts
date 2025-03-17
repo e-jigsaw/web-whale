@@ -1,5 +1,5 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { config } from './config';
+import { config } from './config/index';
 import { UrlConverter } from './services/urlConverter';
 import { Storage } from './services/storage';
 import { urlToFilename } from './utils/filename';
