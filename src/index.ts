@@ -1,7 +1,6 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
 import { config } from './config/index';
-import { UrlConverter } from './services/urlConverter';
-import { Storage } from './services/storage';
+import { UrlConverterService } from './services/converter';
 import { urlToFilename } from './utils/filename';
 
 const client = new Client({
@@ -12,8 +11,7 @@ const client = new Client({
   ]
 });
 
-const storage = new Storage(config.gcsBucketName);
-const converter = new UrlConverter();
+const converter = new UrlConverterService(config.gcsBucketName);
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
@@ -31,17 +29,13 @@ client.on(Events.MessageCreate, async (message) => {
     try {
       console.log(`Processing URL: ${url}`);
       
-      // Convert URL to markdown
-      const markdown = await converter.convertToMarkdown(url);
-      console.log(`Successfully converted ${url} to markdown`);
-
       // Generate filename from URL
       const filename = urlToFilename(url);
       console.log(`Generated filename: ${filename}`);
 
-      // Upload to GCS
-      const fileUrl = await storage.uploadFile(filename, markdown);
-      console.log(`Uploaded to GCS: ${fileUrl}`);
+      // Convert and upload to GCS
+      const fileUrl = await converter.convertAndUpload(url, filename);
+      console.log(`Processed and uploaded to GCS: ${fileUrl}`);
 
       await message.reply({
         content: `Successfully converted ${url}\nMarkdown version: ${fileUrl}`,
